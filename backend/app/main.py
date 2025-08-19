@@ -1,108 +1,48 @@
-from fastapi import FastAPI, UploadFile, Form
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-import os, shutil, sqlite3, datetime
-import fitz  # PyMuPDF
+from fastapi import FastAPI
+import os
+from adobe.pdfservices.operation.auth.service_principal_credentials import ServicePrincipalCredentials
+from adobe.pdfservices.operation.pdf_services import PDFServices
+from adobe.pdfservices.operation.pdfjobs.jobs.export_pdf_job import ExportPDFJob
+from adobe.pdfservices.operation.pdfjobs.params.export_pdf.export_pdf_params import ExportPDFParams
+from adobe.pdfservices.operation.pdfjobs.params.export_pdf.export_pdf_target_format import ExportPDFTargetFormat
+from adobe.pdfservices.operation.io.stream_asset import StreamAsset
 
 app = FastAPI()
 
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# ✅ CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# ✅ Serve uploaded PDFs
-app.mount("/pdfs", StaticFiles(directory=UPLOAD_DIR), name="pdfs")
-
-# ✅ SQLite
-conn = sqlite3.connect("uploads.db", check_same_thread=False)
-cursor = conn.cursor()
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS uploads (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    filename TEXT,
-    role TEXT,
-    jobdesc TEXT,
-    uploaded_at TEXT
-)
-""")
-conn.commit()
-
-@app.post("/upload")
-async def upload_file(file: UploadFile, role: str = Form(...), jobdesc: str = Form(...)):
-    file_path = os.path.join(UPLOAD_DIR, file.filename)
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
-    cursor.execute(
-        "INSERT INTO uploads (filename, role, jobdesc, uploaded_at) VALUES (?, ?, ?, ?)",
-        (file.filename, role, jobdesc, datetime.datetime.now().isoformat())
-    )
-    conn.commit()
-
-    return {"message": "File uploaded", "filename": file.filename}
-
-@app.get("/uploads/{role}")
-async def list_uploads_by_role(role: str):
-    cursor.execute("SELECT id, filename, role, jobdesc, uploaded_at FROM uploads WHERE role=? ORDER BY uploaded_at DESC", (role,))
-    rows = cursor.fetchall()
-    return [
-        {"id": r[0], "filename": r[1], "role": r[2], "jobdesc": r[3], "uploaded_at": r[4]}
-        for r in rows
-    ]
-
-@app.get("/snippets/{filename}")
-async def extract_snippets(filename: str):
-    file_path = os.path.join(UPLOAD_DIR, filename)
-    if not os.path.exists(file_path):
+@app.post("/convert/{filename}")
+async def convert_pdf(filename: str):
+    input_path = os.path.join("uploads", filename)
+    if not os.path.exists(input_path):
         return {"error": "File not found"}
 
-    doc = fitz.open(file_path)
-    snippets = []
-    section_title = "Untitled Section"
+    output_path = os.path.splitext(input_path)[0] + ".docx"
 
-    for page_num, page in enumerate(doc, start=1):
-        blocks = page.get_text("dict")["blocks"]  # structured text
-        for b in blocks:
-            for line in b.get("lines", []):
-                for span in line.get("spans", []):
-                    text = span["text"].strip()
-                    if not text:
-                        continue
+    # Setup Adobe client
+    credentials = ServicePrincipalCredentials(
+        client_id=os.getenv("PDF_SERVICES_CLIENT_ID"),
+        client_secret=os.getenv("PDF_SERVICES_CLIENT_SECRET")
+    )
+    pdf_services = PDFServices(credentials=credentials)
 
-                    # --- Heading detection logic (Round 1A style) ---
-                    is_heading = (
-                        text.isupper() or
-                        len(text.split()) <= 8 and text.endswith(":") or
-                        span["size"] > 12  # heuristic: large font = heading
-                    )
+    # Upload file
+    with open(input_path, "rb") as f:
+        input_stream = StreamAsset(input_stream=f, mime_type="application/pdf")
 
-                    if is_heading:
-                        section_title = text
-                    else:
-                        # Extract snippet (first ~3 sentences)
-                        sentences = text.split(". ")
-                        snippet_text = ". ".join(sentences[:3]) + "..."
-                        snippets.append({
-                            "section": section_title or "Untitled Section",
-                            "snippet": snippet_text,
-                            "page": page_num
-                        })
+    # Export job setup
+    params = ExportPDFParams(target_format=ExportPDFTargetFormat.DOCX)
+    job = ExportPDFJob(input_asset=pdf_services.upload(input_stream=input_stream), export_pdf_params=params)
 
-                    if len(snippets) >= 5:  # max 5 snippets
-                        break
-                if len(snippets) >= 5:
-                    break
-            if len(snippets) >= 5:
-                break
-        if len(snippets) >= 5:
-            break
+    # Execute and save
+    result = pdf_services.submit(job)
+    pdf_services_response = pdf_services.get_job_result(result, ExportPDFJob)
+    resource = pdf_services_response.get_result().get_resource()
+    stream_asset = pdf_services.get_content(resource)
+    with open(output_path, "wb") as f:
+        f.write(stream_asset.get_input_stream().read())
 
-    return {"file": filename, "snippets": snippets}
+    return {"message": "Converted successfully", "output": output_path}
+
+
+
+
