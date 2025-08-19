@@ -1,27 +1,44 @@
 "use client";
-import { useState } from "react";
+import { useState ,useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FaLightbulb, FaHeadphones, FaList } from "react-icons/fa";
 
 export default function AnalysisPage() {
   const [activeTab, setActiveTab] = useState("insights");
   const [showModal, setShowModal] = useState(false);
+
+  const [loading, setLoading] = useState(true);
+  const [highlights, setHighlights] = useState([]);
+  const [insights, setInsights] = useState({ insights: [], contradictions: [], inspirations: [] });
+
   const router = useRouter();
 
-  const highlights = [
-    { title: "Introduction", snippet: "Covers the basics of AI.", page: 1 },
-    { title: "Legal Implications", snippet: "Compliance challenges.", page: 5 },
-    { title: "Methodology", snippet: "Approach to data collection.", page: 6 },
-  ];
+  // fetch analysis data from backend
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const formData = new FormData();
+        const uploadedFile = JSON.parse(localStorage.getItem("uploadedFile"));
+        formData.append("file", uploadedFile);
 
-  const insights = {
-    insights: [
-      "This research connects with ethical AI trends.",
-      "Business strategy overlaps with uploaded docs.",
-    ],
-    contradictions: ["Conflicting timelines in compliance sections."],
-    inspirations: ["Link methodology with your medical dataset analysis."],
-  };
+        const res = await fetch("http://127.0.0.1:8000/analyze", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await res.json();
+        setHighlights(data.highlights);
+        setInsights(data.insights);
+      } catch (err) {
+        console.error("Error fetching insights", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  if (loading) return <div className="p-10">⏳ Analyzing document...</div>;
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -95,22 +112,22 @@ export default function AnalysisPage() {
               Relevant Highlights
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {highlights.map((h, i) => (
-                <div
-                  key={i}
-                  className="p-5 bg-white border rounded-xl shadow-sm hover:shadow-md transition flex flex-col justify-between"
-                >
-                  <div>
-                    <h3 className="font-semibold text-gray-900">
-                      {h.title} (p.{h.page})
-                    </h3>
-                    <p className="text-gray-600 text-sm mt-2">{h.snippet}</p>
-                  </div>
-                  <button className="mt-3 text-sm text-red-600 hover:underline self-start">
-                    Jump →
-                  </button>
+              {(highlights || []).map((h, i) => (
+              <div
+                key={i}
+                className="p-5 bg-white border rounded-xl shadow-sm hover:shadow-md transition flex flex-col justify-between"
+              >
+                <div>
+                  <h3 className="font-semibold text-gray-900">
+                    {h.title} (p.{h.page})
+                  </h3>
+                  <p className="text-gray-600 text-sm mt-2">{h.snippet}</p>
                 </div>
-              ))}
+                <button className="mt-3 text-sm text-red-600 hover:underline self-start">
+                  Jump →
+                </button>
+              </div>
+            ))}
             </div>
           </section>
         </main>

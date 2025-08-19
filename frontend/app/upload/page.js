@@ -6,15 +6,28 @@ import { FaUpload, FaTimes } from "react-icons/fa";
 export default function UploadPage() {
   const router = useRouter();
   const [files, setFiles] = useState([]);
+  const [visited , setVisited] = useState([]);
+  
   const totalPages = 3;
   const currentPage = 2; // Upload step
 
   const handleFileChange = (e) => {
-    setFiles((prev) => [...prev, ...Array.from(e.target.files)]);
+    if (e.target.files && e.target.files.length > 0) {
+      const newFile = e.target.files[0]; // only keep latest file
+      setFiles([newFile]);
+
+      // store visited PDF name
+      setVisited((prev) => {
+        if (!prev.includes(newFile.name)) {
+          return [...prev, newFile.name];
+        }
+        return prev;
+      });
+    }
   };
 
   const removeFile = (index) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
+    setFiles([]);
   };
 
   return (
@@ -75,27 +88,32 @@ export default function UploadPage() {
         />
       </label>
 
-      {/* File List */}
+      {/* Current File  */}
       {files.length > 0 && (
         <div className="mt-6 w-full max-w-2xl bg-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm">
-          <h3 className="text-md font-semibold mb-3 text-gray-700">Uploaded Files:</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {files.map((file, idx) => (
-              <div
-                key={idx}
-                className="flex items-center justify-between bg-white px-3 py-2 rounded-lg shadow-sm border border-gray-200"
-              >
-                <span className="text-gray-700 truncate max-w-[140px]">{file.name}</span>
-                <button
-                  onClick={() => removeFile(idx)}
-                  className="text-red-500 hover:text-red-700 transition"
-                  title="Remove file"
-                >
-                  <FaTimes />
-                </button>
-              </div>
-            ))}
+          <h3 className="text-md font-semibold mb-3 text-gray-700">Selected File:</h3>
+          <div className="flex items-center justify-between bg-white px-3 py-2 rounded-lg shadow-sm border border-gray-200">
+            <span className="text-gray-700 truncate max-w-[200px]">{files[0].name}</span>
+            <button
+              onClick={() => removeFile(0)}
+              className="text-red-500 hover:text-red-700 transition"
+              title="Remove file"
+            >
+              <FaTimes />
+            </button>
           </div>
+        </div>
+      )}
+
+      {/* Visited PDFs */}
+      {visited.length > 0 && (
+        <div className="mt-6 w-full max-w-2xl">
+          <h3 className="text-md font-semibold mb-2 text-gray-700">Visited PDFs:</h3>
+          <ul className="list-disc list-inside text-gray-600">
+            {visited.map((name, i) => (
+              <li key={i}>{name}</li>
+            ))}
+          </ul>
         </div>
       )}
 
