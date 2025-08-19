@@ -1,13 +1,18 @@
 from fastapi import FastAPI, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-import os, shutil, sqlite3, datetime
+import os, shutil, sqlite3, datetime, uuid
 import fitz  # PyMuPDF
+from app.generate_audio import generate_audio
 
+# ✅ Initialize App
 app = FastAPI()
 
+# ✅ Directories
 UPLOAD_DIR = "uploads"
+AUDIO_DIR = "audio"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+os.makedirs(AUDIO_DIR, exist_ok=True)
 
 # ✅ CORS
 app.add_middleware(
@@ -18,10 +23,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ Serve uploaded PDFs
+# ✅ Serve Static Files
 app.mount("/pdfs", StaticFiles(directory=UPLOAD_DIR), name="pdfs")
+app.mount("/audio", StaticFiles(directory=AUDIO_DIR), name="audio")
 
-# ✅ SQLite
+# ✅ SQLite Setup
 conn = sqlite3.connect("uploads.db", check_same_thread=False)
 cursor = conn.cursor()
 cursor.execute("""
@@ -35,6 +41,7 @@ CREATE TABLE IF NOT EXISTS uploads (
 """)
 conn.commit()
 
+# ✅ Upload PDF
 @app.post("/upload")
 async def upload_file(file: UploadFile, role: str = Form(...), jobdesc: str = Form(...)):
     file_path = os.path.join(UPLOAD_DIR, file.filename)
@@ -49,6 +56,7 @@ async def upload_file(file: UploadFile, role: str = Form(...), jobdesc: str = Fo
 
     return {"message": "File uploaded", "filename": file.filename}
 
+# ✅ List Uploads
 @app.get("/uploads/{role}")
 async def list_uploads_by_role(role: str):
     cursor.execute("SELECT id, filename, role, jobdesc, uploaded_at FROM uploads WHERE role=? ORDER BY uploaded_at DESC", (role,))
@@ -58,6 +66,7 @@ async def list_uploads_by_role(role: str):
         for r in rows
     ]
 
+# ✅ Snippet Extractor
 @app.get("/snippets/{filename}")
 async def extract_snippets(filename: str):
     file_path = os.path.join(UPLOAD_DIR, filename)
@@ -69,34 +78,29 @@ async def extract_snippets(filename: str):
     section_title = "Untitled Section"
 
     for page_num, page in enumerate(doc, start=1):
-        blocks = page.get_text("dict")["blocks"]  # structured text
+        blocks = page.get_text("dict")["blocks"]
         for b in blocks:
             for line in b.get("lines", []):
                 for span in line.get("spans", []):
                     text = span["text"].strip()
                     if not text:
                         continue
-
-                    # --- Heading detection logic (Round 1A style) ---
                     is_heading = (
                         text.isupper() or
                         len(text.split()) <= 8 and text.endswith(":") or
-                        span["size"] > 12  # heuristic: large font = heading
+                        span["size"] > 12
                     )
-
                     if is_heading:
                         section_title = text
                     else:
-                        # Extract snippet (first ~3 sentences)
                         sentences = text.split(". ")
-                        snippet_text = ". ".join(sentences[:3]) + "..."
+                        snippet_text = ". ".join(sentences[:3]) + ("..." if len(sentences) > 3 else "")
                         snippets.append({
                             "section": section_title or "Untitled Section",
                             "snippet": snippet_text,
                             "page": page_num
                         })
-
-                    if len(snippets) >= 5:  # max 5 snippets
+                    if len(snippets) >= 5:
                         break
                 if len(snippets) >= 5:
                     break
@@ -106,3 +110,47 @@ async def extract_snippets(filename: str):
             break
 
     return {"file": filename, "snippets": snippets}
+
+# ✅ Snippet to Audio
+@app.get("/snippets/audio/{filename}")
+async def snippets_audio(filename: str):
+    file_path = os.path.join(UPLOAD_DIR, filename)
+    if not os.path.exists(file_path):
+        return {"error": "File not found"}
+
+    doc = fitz.open(file_path)
+    snippets = []
+    section_title = "Untitled Section"
+
+    for page_num, page in enumerate(doc, start=1):
+        blocks = page.get_text("dict")["blocks"]
+        for b in blocks:
+            for line in b.get("lines", []):
+                for span in line.get("spans", []):
+                    text = span["text"].strip()
+                    if not text:
+                        continue
+                    is_heading = (
+                        text.isupper() or
+                        (len(text.split()) <= 8 and text.endswith(":")) or
+                        span["size"] > 12
+                    )
+                    if is_heading:
+                        section_title = text
+                    else:
+                        sentences = text.split(". ")
+                        snippet_text = ". ".join(sentences[:3]) + ("..." if len(sentences) > 3 else "")
+                        snippets.append(snippet_text)
+    combined_text = "\n".join(snippets[:10])
+
+    audio_filename = f"snippet_audio_{uuid.uuid4().hex[:6]}.mp3"
+    output_path = os.path.join(AUDIO_DIR, audio_filename)
+
+    try:
+        generate_audio(combined_text, output_path)
+        return {
+            "audio_url": f"/audio/{audio_filename}",
+            "message": "Audio generated from snippets"
+        }
+    except Exception as e:
+        return {"error": str(e)}
