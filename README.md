@@ -66,7 +66,7 @@ cd Adobe-Hackathon-2025
 ```bash
 cd backend
 pip install -r requirements.txt
-uvicorn app.main:app --reload
+uvicorn backend.app.main:app --reload
 ```
 
 3. Frontend Setup
