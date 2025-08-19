@@ -29,10 +29,11 @@ export default function AnalysisPage() {
   const [snippets, setSnippets] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [files, setFiles] = useState([]);
+  const [audioUrl, setAudioUrl] = useState(null); // ✅ NEW
 
   const BASE_URL = process.env.NEXT_PUBLIC_API_BASE;
 
-  // ✅ Fetch uploaded files for this role
+  // ✅ Fetch uploaded files
   useEffect(() => {
     if (!role) return;
     fetch(`${BASE_URL}/uploads/${role}`)
@@ -43,16 +44,34 @@ export default function AnalysisPage() {
       .catch((err) => console.error("Error fetching uploads:", err));
   }, [BASE_URL, role]);
 
-  // ✅ Fetch snippets for selected file
+  // ✅ Fetch snippets
   useEffect(() => {
     if (!selectedFile) return;
     fetch(`${BASE_URL}/snippets/${selectedFile}`)
       .then((res) => res.json())
       .then((data) => {
         setSnippets(data.snippets || []);
+        setAudioUrl(null); // ✅ Reset audio if new file selected
       })
       .catch((err) => console.error("Error fetching snippets:", err));
   }, [BASE_URL, selectedFile]);
+
+  // ✅ Podcast generation
+  const handleGeneratePodcast = async () => {
+    if (!selectedFile) return;
+    try {
+      const res = await fetch(`${BASE_URL}/snippets/audio/${selectedFile}`);
+      const data = await res.json();
+      if (data.audio_url) {
+        setAudioUrl(`${BASE_URL}${data.audio_url}`);
+      } else {
+        alert("Failed to generate audio");
+      }
+    } catch (err) {
+      console.error("Podcast generation error:", err);
+      alert("Error generating podcast");
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -65,7 +84,10 @@ export default function AnalysisPage() {
           {role} • {job}
         </div>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+          <button
+            onClick={handleGeneratePodcast}
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
             <FaHeadphones /> Podcast Mode
           </button>
           <button className="flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200">
@@ -76,7 +98,7 @@ export default function AnalysisPage() {
 
       {/* Layout */}
       <div className="flex flex-1">
-        {/* Sidebar - Uploaded Docs */}
+        {/* Sidebar */}
         <aside className="w-72 bg-white border-r px-5 py-6 hidden md:block">
           <h2 className="font-semibold mb-4 flex items-center gap-2 text-gray-800">
             <FaList /> Uploaded Documents
@@ -101,7 +123,7 @@ export default function AnalysisPage() {
             )}
           </ul>
         </aside>
-            
+
         {/* Main Content */}
         <main className="flex-1 p-8 overflow-y-auto">
           <button
@@ -137,6 +159,16 @@ export default function AnalysisPage() {
                 <p className="text-gray-500 italic">
                   No snippets available for this document.
                 </p>
+              )}
+
+              {/* ✅ AUDIO PLAYER */}
+              {audioUrl && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                    Audio Podcast
+                  </h3>
+                  <audio controls src={audioUrl} className="w-full" />
+                </div>
               )}
             </div>
           ) : (
