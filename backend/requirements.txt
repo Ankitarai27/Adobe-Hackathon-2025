@@ -7,3 +7,7 @@ scikit-learn
 google-generativeai
 openai
 python-multipart
+python-dotenv
+pydantic
+requests
+aiofiles
