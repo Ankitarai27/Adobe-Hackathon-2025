@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pdfminer.six
+pymupdf
+sentence-transformers
+scikit-learn
+google-generativeai
+openai
+python-multipart
