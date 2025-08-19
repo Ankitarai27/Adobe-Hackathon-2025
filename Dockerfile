@@ -1,30 +1,56 @@
-# Use official Python image
+# Use official Python slim image for backend
 FROM python:3.11-slim
 
-# Set work directory
+# Set working directory
 WORKDIR /app
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y curl gnupg supervisor
+RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg \
+    supervisor \
+    build-essential \
+    git \
+    ffmpeg
 
-# Install Node.js (for frontend)
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs
+# Install Node.js for frontend (Next.js)
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs
 
-# Install Python dependencies
+# -------------------------
+# 🔧 Install Backend Dependencies
+# -------------------------
 COPY backend/requirements.txt backend/requirements.txt
 RUN pip install --no-cache-dir -r backend/requirements.txt
 
-# Copy backend and frontend code
+# -------------------------
+# 📁 Copy Project Code
+# -------------------------
 COPY backend ./backend
 COPY frontend ./frontend
 
-# Copy Supervisor config
+# -------------------------
+# 🔧 Install Frontend Dependencies and Build
+# -------------------------
+WORKDIR /app/frontend
+RUN npm install && npm run build
+
+# -------------------------
+# 🔄 Return to Root
+# -------------------------
+WORKDIR /app
+
+# -------------------------
+#  Copy Supervisor Config
+# -------------------------
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Expose ports if needed
-EXPOSE 8000
-EXPOSE 3000
+# -------------------------
+# 📡 Expose Ports
+# -------------------------
+EXPOSE 8000 3000
 
-# Start both servers via supervisor
+# -------------------------
+# 🚀 Start Backend + Frontend Together
+# -------------------------
 CMD ["/usr/bin/supervisord"]
