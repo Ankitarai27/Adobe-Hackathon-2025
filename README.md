@@ -6,7 +6,7 @@ It allows users to **upload PDFs**, process them through a **FastAPI backend**, 
 ---
 
 ## 📂 Project Structure
-
+```bash
 ├── backend
 │ ├── app
 │ │ ├── routers/ # API routes
@@ -25,7 +25,7 @@ It allows users to **upload PDFs**, process them through a **FastAPI backend**, 
 │ ├── services/ # API calls to backend
 │ ├── package.json # Node.js dependencies
 │ └── tailwind.config.js # TailwindCSS setup
-
+```
 
 ---
 
