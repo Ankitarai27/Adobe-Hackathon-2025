@@ -1,12 +1,47 @@
-# 🚀 Adobe Hackathon 2025 — Intelligent PDF Insight & Podcast Generator
+<div align="center">
 
-> **Turn heavy PDFs into role-aware insights and podcast-style briefings in minutes.**
+# 🚀 Adobe Hackathon 2025
+### <i>Intelligent PDF Insight & Podcast Generator</i>
 
-[![Stack](https://img.shields.io/badge/Stack-FastAPI%20%2B%20Next.js-blue)](#-tech-stack)
-[![Database](https://img.shields.io/badge/Database-SQLite-green)](#-tech-stack)
-[![UI](https://img.shields.io/badge/UI-Tailwind%20%2B%20React%20Icons-purple)](#-frontend-experience)
-[![Runtime](https://img.shields.io/badge/Runtime-Docker%20%2B%20Supervisor-orange)](#-deployment-options)
+<p>
+  <img src="https://img.shields.io/badge/Status-Hackathon%20Ready-22c55e?style=for-the-badge" alt="status" />
+  <img src="https://img.shields.io/badge/Frontend-Next.js%20%2B%20React-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="frontend" />
+  <img src="https://img.shields.io/badge/Backend-FastAPI%20%2B%20Python-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="backend" />
+  <img src="https://img.shields.io/badge/Database-SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="database" />
+  <img src="https://img.shields.io/badge/Runtime-Docker%20%2B%20Supervisor-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="runtime" />
+</p>
 
+<p>
+  <b>📄 Smart PDF Ingestion</b> &nbsp;•&nbsp;
+  <b>🧠 Role-Aware Insight Extraction</b> &nbsp;•&nbsp;
+  <b>🔊 Podcast-Style Briefings</b> &nbsp;•&nbsp;
+  <b>⚡ Fast Review Workflow</b>
+</p>
+
+<br/>
+
+<table>
+  <tr>
+    <td align="center"><b>⚡ Fast UX</b><br/>Upload once, analyze in seconds.</td>
+    <td align="center"><b>🎯 Persona Aware</b><br/>Role-specific retrieval and context.</td>
+    <td align="center"><b>🔊 Dual Consumption</b><br/>Read snippets or listen as audio.</td>
+  </tr>
+</table>
+</div>
+---
+
+## 📚 Table of Contents
+1. [🌟 Executive Summary](#-executive-summary)
+2. [🧭 Product Journey Flowchart](#-product-journey-flowchart-detailed)
+3. [🧱 System Architecture](#-system-architecture-beautiful-overview)
+4. [🛠️ Tech Stack](#️-tech-stack)
+5. [📁 Project Structure](#-project-structure)
+6. [🔌 API Reference](#-api-reference-detailed)
+7. [🚀 Local Development](#-local-development)
+8. [🐳 Deployment Options](#-deployment-options)
+9. [🧪 Quality Checks & Validation Flow](#-quality-checks--validation-flow)
+10.[🔮 Future Enhancements Roadmap](#-future-enhancements-roadmap)
+   
 ---
 
 ## 🌟 Executive Summary
@@ -335,7 +370,7 @@ flowchart TB
       C[🛢️ PostgreSQL\n+ Migrations]
     end
 
-    subgraph P2[Phase 2 · Product Intelligence]
+    subgraph P2[Phase 2 · Intelligence]
       D[🔐 Authentication\n+ Multi-user Isolation]
       E[🤖 Embeddings\n+ Better Ranking]
     end
@@ -350,10 +385,12 @@ flowchart TB
 
     classDef current fill:#E3F2FD,stroke:#1E88E5,color:#0D47A1,stroke-width:2px;
     classDef phase1 fill:#E8F5E9,stroke:#43A047,color:#1B5E20,stroke-width:2px;
+    classDef phase2 fill:#FFF8E1,stroke:#FB8C00,color:#E65100,stroke-width:2px;
     classDef phase3 fill:#F3E5F5,stroke:#8E24AA,color:#4A148C,stroke-width:2px;
 
     class A current;
     class B,C phase1;
+    class D,E phase2;
     class F,G phase3;
 ```
 
