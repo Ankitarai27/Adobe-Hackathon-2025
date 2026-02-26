@@ -77,7 +77,7 @@ flowchart LR
 ## 🧱 System Architecture (Beautiful Overview)
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph USER[👥 User Layer]
         U[User]
     end
