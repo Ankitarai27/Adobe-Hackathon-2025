@@ -28,7 +28,7 @@ Upload PDFs → Extract role-specific insights → Listen as an audio briefing
 ## 🧭 Product Journey Flowchart (Detailed)
 
 ```mermaid
-flowchart TB
+flowchart LR
     A[👤 Open Web App] --> B[🎭 Choose Persona]
     B --> C[🧾 Enter Job Context]
     C --> D[📤 Upload PDF]
@@ -36,12 +36,24 @@ flowchart TB
     E --> F[🗂️ Save PDF in backend/uploads]
     F --> G[🗃️ Save Metadata in uploads.db]
     G --> H[📚 List docs via /uploads/:role]
-    H --> I[📖 Pick document]
-    I --> J[🧠 Extract snippets / headings]
-    J --> K[🪄 Render insight cards]
+    H --> I[📖 Pick Document]
+    I --> J[🧠 Extract Snippets + Headings]
+    J --> K[🪄 Render Insight Cards]
     K --> L[🎙️ Click Podcast Mode]
     L --> M[🔊 Generate MP3 in backend/audio]
-    M --> N[▶️ Stream audio in browser]
+    M --> N[▶️ Stream Audio in Browser]
+
+    classDef user fill:#E3F2FD,stroke:#1E88E5,color:#0D47A1,stroke-width:2px;
+    classDef input fill:#E8F5E9,stroke:#43A047,color:#1B5E20,stroke-width:2px;
+    classDef backend fill:#FFF8E1,stroke:#FB8C00,color:#E65100,stroke-width:2px;
+    classDef insight fill:#F3E5F5,stroke:#8E24AA,color:#4A148C,stroke-width:2px;
+    classDef audio fill:#FCE4EC,stroke:#D81B60,color:#880E4F,stroke-width:2px;
+
+    class A,B user;
+    class C,D input;
+    class E,F,G,H,I backend;
+    class J,K insight;
+    class L,M,N audio;
 ```
 
 ## 🎨 Stage-by-Stage Explanation Table
@@ -65,7 +77,7 @@ flowchart TB
 ## 🧱 System Architecture (Beautiful Overview)
 
 ```mermaid
-flowchart TB
+flowchart LR
     subgraph USER[👥 User Layer]
         U[User]
     end
@@ -109,6 +121,18 @@ flowchart TB
     A1 --> FS1
     A3 --> S1 --> S2 --> FS1
     A4 --> S3 --> FS2
+
+    classDef user fill:#E3F2FD,stroke:#1E88E5,color:#0D47A1,stroke-width:2px;
+    classDef frontend fill:#E8F5E9,stroke:#43A047,color:#1B5E20,stroke-width:2px;
+    classDef api fill:#FFF8E1,stroke:#FB8C00,color:#E65100,stroke-width:2px;
+    classDef service fill:#F3E5F5,stroke:#8E24AA,color:#4A148C,stroke-width:2px;
+    classDef store fill:#FCE4EC,stroke:#D81B60,color:#880E4F,stroke-width:2px;
+
+    class U user;
+    class FE1,FE2,FE3,FE4 frontend;
+    class A1,A2,A3,A4 api;
+    class S1,S2,S3 service;
+    class DB,FS1,FS2 store;
 ```
 
 ## 🧩 Component Deep-Dive (Detailed)
@@ -138,6 +162,28 @@ flowchart TB
 ---
 
 ## 🛠️ Tech Stack
+
+```mermaid
+flowchart LR
+    FE[💻 Frontend\nNext.js 15 · React 19\nTailwind CSS · react-icons]
+    BE[⚙️ Backend\nFastAPI · Uvicorn\nPyMuPDF]
+    DATA[🗄️ Data\nSQLite uploads.db]
+    DEVOPS[🚀 Runtime\nDocker · Supervisor]
+
+    FE --> BE --> DATA
+    DEVOPS -. orchestrates .-> FE
+    DEVOPS -. orchestrates .-> BE
+
+    classDef frontend fill:#E8F5E9,stroke:#43A047,color:#1B5E20,stroke-width:2px;
+    classDef backend fill:#FFF8E1,stroke:#FB8C00,color:#E65100,stroke-width:2px;
+    classDef data fill:#FCE4EC,stroke:#D81B60,color:#880E4F,stroke-width:2px;
+    classDef runtime fill:#E3F2FD,stroke:#1E88E5,color:#0D47A1,stroke-width:2px;
+
+    class FE frontend;
+    class BE backend;
+    class DATA data;
+    class DEVOPS runtime;
+```
 
 | Layer | Technologies |
 |---|---|
@@ -258,12 +304,20 @@ docker run -p 3000:3000 -p 8000:8000 adobe-hackathon-2025
 ## 🧪 Quality Checks & Validation Flow
 
 ```mermaid
-flowchart TB
+flowchart LR
     A[🧾 Upload Input] --> B[✅ Backend Validation]
     B --> C[🧠 Snippet Extraction]
     C --> D[📋 UI Rendering]
     D --> E[🔊 Audio Generation]
     E --> F[🎧 Playback Verification]
+
+    classDef input fill:#E8F5E9,stroke:#43A047,color:#1B5E20,stroke-width:2px;
+    classDef process fill:#FFF8E1,stroke:#FB8C00,color:#E65100,stroke-width:2px;
+    classDef output fill:#F3E5F5,stroke:#8E24AA,color:#4A148C,stroke-width:2px;
+
+    class A,B input;
+    class C,D,E process;
+    class F output;
 ```
 
 This flow ensures each stage is testable and user-visible from ingestion to final playback.
@@ -273,13 +327,36 @@ This flow ensures each stage is testable and user-visible from ingestion to fina
 ## 🔮 Future Enhancements Roadmap
 
 ```mermaid
-flowchart TD
-    A[🧬 Current Prototype] --> B[☁️ Object Storage S3/GCS]
-    A --> C[🛢️ PostgreSQL + Migrations]
-    A --> D[🔐 Authentication + Multi-user Isolation]
-    A --> E[🤖 Embeddings + Better Ranking]
-    A --> F[🌍 Multilingual + Multi-voice TTS]
-    A --> G[📈 Monitoring + Analytics]
+flowchart LR
+    A[🧬 Current Prototype]
+
+    subgraph P1[Phase 1 · Scale Foundation]
+      B[☁️ Object Storage\nS3 / GCS]
+      C[🛢️ PostgreSQL\n+ Migrations]
+    end
+
+    subgraph P2[Phase 2 · Product Intelligence]
+      D[🔐 Authentication\n+ Multi-user Isolation]
+      E[🤖 Embeddings\n+ Better Ranking]
+    end
+
+    subgraph P3[Phase 3 · Global Reach + Ops]
+      F[🌍 Multilingual\n+ Multi-voice TTS]
+      G[📈 Monitoring\n+ Analytics]
+    end
+
+    A --> B --> D --> F
+    A --> C --> E --> G
+
+    classDef current fill:#E3F2FD,stroke:#1E88E5,color:#0D47A1,stroke-width:2px;
+    classDef phase1 fill:#E8F5E9,stroke:#43A047,color:#1B5E20,stroke-width:2px;
+    classDef phase2 fill:#FFF8E1,stroke:#FB8C00,color:#E65100,stroke-width:2px;
+    classDef phase3 fill:#F3E5F5,stroke:#8E24AA,color:#4A148C,stroke-width:2px;
+
+    class A current;
+    class B,C phase1;
+    class D,E phase2;
+    class F,G phase3;
 ```
 
 | Upgrade Track | Expected Improvement |
