@@ -28,7 +28,7 @@ Upload PDFs → Extract role-specific insights → Listen as an audio briefing
 ## 🧭 Product Journey Flowchart (Detailed)
 
 ```mermaid
-flowchart LR
+flowchart TB
     A[👤 Open Web App] --> B[🎭 Choose Persona]
     B --> C[🧾 Enter Job Context]
     C --> D[📤 Upload PDF]
