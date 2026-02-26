@@ -364,4 +364,4 @@ docker run --name adobe-hackathon \
 
 ## 19) License
 
-Add your preferred license (MIT / Apache-2.0 / proprietary) based on your team policy.
+MIT license .
