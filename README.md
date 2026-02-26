@@ -1,88 +1,154 @@
-# Adobe Hackathon 2025 — Intelligent PDF Insight & Podcast Generator
+# 🚀 Adobe Hackathon 2025 — Intelligent PDF Insight & Podcast Generator
 
-An end-to-end full-stack project for **Adobe Hackathon 2025** that turns static PDFs into role-aware, quick-consumption knowledge.
+> **Turn heavy PDFs into role-aware insights and podcast-style briefings in minutes.**
 
----
-
-## 1) Heading Summary
-
-This project helps users upload PDFs, organize them by persona/job context, read extracted snippet highlights, and optionally generate audio narration (“podcast mode”) from those snippets.
-
-If you want a one-line summary:
-
-> **Upload documents → extract smart snippets → listen to insights as audio.**
+[![Stack](https://img.shields.io/badge/Stack-FastAPI%20%2B%20Next.js-blue)](#-tech-stack)
+[![Database](https://img.shields.io/badge/Database-SQLite-green)](#-tech-stack)
+[![UI](https://img.shields.io/badge/UI-Tailwind%20%2B%20React%20Icons-purple)](#-frontend-experience)
+[![Runtime](https://img.shields.io/badge/Runtime-Docker%20%2B%20Supervisor-orange)](#-deployment-options)
 
 ---
 
-## 2) Project Summary
+## 🌟 Executive Summary
 
-### What problem this solves
-Long PDFs are slow to consume. This app reduces reading time by extracting meaningful snippet-level content and presenting it in a lightweight analysis interface.
+Long PDFs are difficult to consume quickly. This project creates a **dual-consumption experience**:
 
-### What the app delivers
-- Fast PDF upload and storage.
-- Role-based document listing (`/uploads/{role}`).
-- Snippet extraction from document pages.
-- Audio generation from extracted text for hands-free review.
-- Frontend UX for upload + analysis + podcast playback.
+- 📄 **Read mode**: browse extracted snippets and likely key sections.
+- 🔊 **Listen mode**: convert those snippets into an MP3 summary.
+- 🎭 **Persona-aware context**: upload and retrieve files by role/use-case.
 
----
+### One-line product promise
 
-## 3) What is unique in this project
-
-This project is not just a PDF uploader. Its unique combination is:
-
-1. **Persona-aware flow**
-   - Uploads are tied to role/job context so analysis can be grouped by use-case.
-
-2. **Hybrid reading + listening experience**
-   - Users can inspect snippets visually and generate audio from the same source.
-
-3. **Practical architecture for hackathon speed**
-   - Local filesystem + SQLite for quick iteration.
-   - Docker + Supervisor support for running frontend and backend together.
-
-4. **Clear path to production**
-   - Current prototype architecture can be upgraded to managed DB/object storage without redesigning user flow.
+```text
+Upload PDFs → Extract role-specific insights → Listen as an audio briefing
+```
 
 ---
 
-## 4) Core Flow (End-to-End)
+## 🧭 Product Journey Flowchart (Detailed)
 
-1. User opens frontend and selects persona/job parameters.
-2. User uploads one or more PDFs.
-3. Backend stores file in `uploads/` and metadata in `uploads.db`.
-4. Analysis page fetches role-based file list.
-5. User selects a file.
-6. Backend extracts section/snippet text using PyMuPDF.
-7. Frontend displays extracted snippet cards.
-8. User clicks podcast mode.
-9. Backend generates MP3 in `audio/` and returns a URL.
-10. Frontend plays generated audio in browser.
+```mermaid
+flowchart LR
+    A[👤 Open Web App] --> B[🎭 Choose Persona]
+    B --> C[🧾 Enter Job Context]
+    C --> D[📤 Upload PDF]
+    D --> E[✅ Backend Validates File]
+    E --> F[🗂️ Save PDF in backend/uploads]
+    F --> G[🗃️ Save Metadata in uploads.db]
+    G --> H[📚 List docs via /uploads/:role]
+    H --> I[📖 Pick document]
+    I --> J[🧠 Extract snippets / headings]
+    J --> K[🪄 Render insight cards]
+    K --> L[🎙️ Click Podcast Mode]
+    L --> M[🔊 Generate MP3 in backend/audio]
+    M --> N[▶️ Stream audio in browser]
+```
+
+## 🎨 Stage-by-Stage Explanation Table
+
+| Stage | What happens | Why it matters | Output |
+|---|---|---|---|
+| 👤 App entry | User opens the frontend interface. | Starts a guided workflow instead of a raw uploader. | Ready UI state |
+| 🎭 Persona selection | User chooses role/persona context. | Keeps analysis use-case specific. | Role tag |
+| 📤 Upload | PDF file is submitted with metadata. | Binds content with intent (role + job desc). | File payload |
+| ✅ Validation | FastAPI checks file and request format. | Prevents invalid uploads early. | Accepted request |
+| 🗂️ File persistence | PDF saved under `backend/uploads/`. | Keeps original source available for re-analysis. | Stored PDF |
+| 🗃️ Metadata save | Filename/role/jobdesc/timestamp saved in SQLite. | Enables role-filtered retrieval and history. | DB record |
+| 📚 Retrieval | Frontend fetches documents using role endpoint. | Users can quickly find relevant docs. | Role-specific list |
+| 🧠 Extraction | Snippet engine parses PDF text using PyMuPDF. | Converts long documents into digestible chunks. | Structured snippets |
+| 🪄 Presentation | Frontend renders cards with concise insight text. | Improves scanning speed and readability. | Insight dashboard |
+| 🎙️ Audio generation | Backend synthesizes snippet narration. | Supports hands-free consumption. | MP3 file URL |
+| ▶️ Playback | Browser audio player streams the MP3. | Final user experience: listen on demand. | Audio briefing |
 
 ---
 
-## 5) Tech Stack
+## 🧱 System Architecture (Beautiful Overview)
 
-### Frontend
-- **Next.js 15** (App Router)
-- **React 19**
-- **TailwindCSS**
-- **react-icons**
+```mermaid
+flowchart TB
+    subgraph USER[👥 User Layer]
+        U[User]
+    end
 
-### Backend
-- **FastAPI**
-- **Uvicorn**
-- **PyMuPDF (`fitz`)** for PDF text extraction
-- **SQLite** for upload metadata
+    subgraph FE[💻 Frontend · Next.js + React]
+        FE1[Upload Screen]
+        FE2[Analysis Screen]
+        FE3[Snippet Cards]
+        FE4[Podcast Player]
+    end
 
-### Runtime / Deployment
-- **Docker** (single-image full-stack build)
-- **Supervisor** to run both backend + frontend in one container
+    subgraph API[⚙️ FastAPI Backend]
+        A1[POST /upload]
+        A2[GET /uploads/:role]
+        A3[GET /snippets/:filename]
+        A4[GET /snippets/audio/:filename]
+    end
+
+    subgraph SRV[🧠 Service Layer]
+        S1[PDF Parser · PyMuPDF]
+        S2[Snippet/Insight Builder]
+        S3[TTS / Audio Generator]
+    end
+
+    subgraph STORE[🗄️ Persistence Layer]
+        DB[(SQLite: uploads.db)]
+        FS1[(PDF Store: backend/uploads)]
+        FS2[(Audio Store: backend/audio)]
+    end
+
+    U --> FE1
+    U --> FE2
+    U --> FE4
+
+    FE1 --> A1
+    FE2 --> A2
+    FE2 --> A3
+    FE4 --> A4
+
+    A1 --> DB
+    A1 --> FS1
+    A3 --> S1 --> S2 --> FS1
+    A4 --> S3 --> FS2
+```
+
+## 🧩 Component Deep-Dive (Detailed)
+
+| Component | Responsibility | Key Strength | Related Paths |
+|---|---|---|---|
+| 💻 Frontend (Next.js) | Handles upload UX, analysis view, and playback controls. | Fast and interactive UI for scanning insights. | `frontend/app`, `frontend/services` |
+| ⚙️ API Routes (FastAPI) | Receives uploads, lists files, extracts snippets, generates audio. | Clear endpoint-driven architecture. | `backend/app/main.py`, `backend/app/routers` |
+| 🧠 PDF Insight Services | Parses PDFs and builds snippet-level output. | Converts dense docs into readable chunks. | `backend/app/services`, `backend/app/utils` |
+| 🔊 Audio Service | Turns snippet text into MP3 narration. | Enables read + listen dual mode. | `backend/app/generate_audio.py`, `backend/audio` |
+| 🗃️ SQLite Metadata | Stores role/job/file tracking metadata. | Lightweight and hackathon-friendly persistence. | `backend/uploads.db` |
+| 🗂️ File Storage | Stores original PDFs and generated MP3 artifacts. | Simple, transparent local storage model. | `backend/uploads`, `backend/audio` |
 
 ---
 
-## 6) Project Structure
+## ✨ Feature Matrix
+
+| Feature | Description | User Benefit |
+|---|---|---|
+| 🎭 Persona-aware uploads | Uploads are tagged by role and context. | More relevant retrieval and review. |
+| 📂 Role-based listing | Files fetched by role endpoint. | Easier organization by use-case. |
+| 🧠 Snippet extraction | Pulls concise text segments from pages. | Faster comprehension than full reading. |
+| 🔊 Podcast mode | Generates audio from extracted text. | Hands-free content consumption. |
+| 📎 Static serving | PDF/MP3 assets served via backend routes. | Smooth preview and playback experience. |
+| 🐳 Docker-friendly runtime | Can run as one containerized stack. | Easier demo and deployment setup. |
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technologies |
+|---|---|
+| Frontend | Next.js 15, React 19, Tailwind CSS, react-icons |
+| Backend | FastAPI, Uvicorn, PyMuPDF (`fitz`) |
+| Data | SQLite (`uploads.db`) |
+| Runtime | Docker, Supervisor |
+
+---
+
+## 📁 Project Structure
 
 ```text
 Adobe-Hackathon-2025/
@@ -93,275 +159,147 @@ Adobe-Hackathon-2025/
 │   │   ├── routers/
 │   │   ├── services/
 │   │   └── utils/
-│   ├── requirements.txt
-│   ├── uploads/                  # runtime PDF storage
-│   ├── audio/                    # runtime MP3 storage
-│   └── uploads.db                # SQLite metadata DB
+│   ├── uploads/              # runtime PDFs
+│   ├── audio/                # runtime MP3s
+│   ├── uploads.db            # SQLite metadata
+│   └── requirements.txt
 ├── frontend/
 │   ├── app/
 │   ├── services/
-│   │   └── api.js
-│   ├── package.json
-│   └── ...
+│   └── package.json
 ├── Dockerfile
 ├── supervisord.conf
 └── README.md
 ```
 
----
+## 📚 Structure Explanation Table
 
-## 7) Project Structure Explanation
-
-### `backend/app/main.py`
-Main FastAPI entrypoint. Defines upload/list/snippet/audio endpoints, static file mounts, and DB table setup.
-
-### `backend/app/generate_audio.py`
-Audio generation helper used by snippet-audio route.
-
-### `backend/uploads/`
-Stores uploaded PDF files at runtime.
-
-### `backend/audio/`
-Stores generated audio files at runtime.
-
-### `backend/uploads.db`
-SQLite database containing upload metadata (`filename`, `role`, `jobdesc`, `uploaded_at`).
-
-### `frontend/app/`
-Next.js app pages, including upload and analysis flows.
-
-### `frontend/services/api.js`
-Client-side API utility functions and base URL handling.
-
-### `Dockerfile` + `supervisord.conf`
-Single-container setup that builds frontend and runs frontend + backend simultaneously.
+| Path | Purpose |
+|---|---|
+| `backend/app/main.py` | Main API application setup, routes wiring, and service orchestration. |
+| `backend/app/routers/` | Route modules for specific domains (upload/snippet/persona/podcast flows). |
+| `backend/app/services/` | Business logic for extraction, persona processing, and TTS support. |
+| `backend/app/utils/` | Shared helpers for file and PDF handling. |
+| `backend/uploads/` | Uploaded source PDF documents. |
+| `backend/audio/` | Generated podcast-style MP3 files. |
+| `backend/uploads.db` | Metadata persistence (role, filename, jobdesc, timestamp). |
+| `frontend/app/` | Main UI pages and route-level components. |
+| `frontend/services/` | API helper methods used by UI layers. |
 
 ---
 
-## 8) API Overview
+## 🔌 API Reference (Detailed)
 
 Base URL (local): `http://127.0.0.1:8000`
 
-### `POST /upload`
-Uploads PDF + metadata.
-
-- **Content-Type:** `multipart/form-data`
-- **Fields:**
-  - `file` (pdf)
-  - `role` (string)
-  - `jobdesc` (string)
-
-**Success response (example):**
-```json
-{
-  "message": "File uploaded",
-  "filename": "my-doc.pdf"
-}
-```
-
-### `GET /uploads/{role}`
-Returns files uploaded for a specific role (latest first).
-
-### `GET /snippets/{filename}`
-Extracts up to snippet entries from the PDF with section context and page number.
-
-### `GET /snippets/audio/{filename}`
-Generates an MP3 from extracted snippet text and returns the audio URL.
-
-### Static file routes
-- `/pdfs/<filename>`
-- `/audio/<filename>`
+| Method | Endpoint | Purpose | Input | Output |
+|---|---|---|---|---|
+| `POST` | `/upload` | Upload PDF with persona metadata | `multipart/form-data` (`file`, `role`, `jobdesc`) | Confirmation + filename |
+| `GET` | `/uploads/{role}` | Fetch files by role | `role` path param | Role-filtered file list |
+| `GET` | `/snippets/{filename}` | Extract snippets from chosen file | `filename` path param | Snippet objects |
+| `GET` | `/snippets/audio/{filename}` | Generate audio from snippets | `filename` path param | MP3 URL payload |
+| `GET` | `/pdfs/<filename>` | Serve uploaded PDF | filename path | Binary/stream response |
+| `GET` | `/audio/<filename>` | Serve generated audio | filename path | Binary/stream response |
 
 ---
 
-## 9) Backend Details
+## 🚀 Local Development
 
-### Backend responsibilities
-- Accept and persist uploads.
-- Maintain upload metadata in SQLite.
-- Parse PDF text blocks and detect probable headings.
-- Generate short snippet chunks for quick preview.
-- Convert snippet text to audio file.
-- Expose static paths for PDFs and MP3 playback.
-
-### Important design notes
-- CORS currently allows localhost frontend origins.
-- Data persistence is local (good for prototype/hackathon, limited for scale).
-- Snippet extraction is heuristic-based (heading/size/text-shape rules).
-
----
-
-## 10) Frontend Details
-
-### Frontend responsibilities
-- Collect role/job context and file uploads.
-- Call backend upload endpoint.
-- Fetch role-filtered uploaded docs.
-- Fetch and render snippet list.
-- Trigger podcast generation endpoint.
-- Render audio player for generated MP3.
-
-### UX pages
-- **Upload page:** drag/drop + multi-file upload + current/history context.
-- **Analysis page:** selectable documents, snippet cards, podcast mode button.
-
----
-
-## 11) Key Features (Everything in one list)
-
-- Persona/job-aware uploads.
-- PDF upload pipeline with metadata tracking.
-- Role-based document retrieval.
-- Snippet extraction from PDF pages.
-- Podcast mode: text-to-audio generation.
-- Static serving for PDFs/audio.
-- FastAPI + Next.js full-stack architecture.
-- Single-container deployment support.
-
----
-
-## 12) Setup (Local Development)
-
-## Prerequisites
+### Prerequisites
 - Python 3.11+
 - Node.js 18+
 - npm
-- ffmpeg (recommended for audio path)
+- ffmpeg (recommended for audio workflow)
 
-## Step-by-step setup
-
-### Step 1 — Clone
+### 1) Clone repository
 ```bash
 git clone <your-repo-url>
 cd Adobe-Hackathon-2025
 ```
 
-### Step 2 — Start backend (terminal A)
+### 2) Start backend
 ```bash
 cd backend
 python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### Step 3 — Configure frontend env
-Create `frontend/.env.local`:
-```env
-NEXT_PUBLIC_API_BASE=http://127.0.0.1:8000
-```
-
-### Step 4 — Start frontend (terminal B)
+### 3) Start frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-### Step 5 — Access app
-- Frontend: `http://localhost:3000`
-- Backend docs: `http://127.0.0.1:8000/docs`
+| Service | URL |
+|---|---|
+| Frontend | `http://localhost:3000` |
+| Backend | `http://localhost:8000` |
 
 ---
 
-## 13) Deployment Logic (Step-by-Step)
+## 🐳 Deployment Options
 
-## Option A: Single Docker deployment (quick start)
+### Option A — Docker (recommended)
 
-### Step 1 — Build image
 ```bash
-docker build -t adobe-hackathon-2025:latest .
+docker build -t adobe-hackathon-2025 .
+docker run -p 3000:3000 -p 8000:8000 adobe-hackathon-2025
 ```
 
-### Step 2 — Run container
-```bash
-docker run --name adobe-hackathon \
-  -p 3000:3000 -p 8000:8000 \
-  -d adobe-hackathon-2025:latest
+### Option B — Split local runtime
+- Run FastAPI from `backend/`
+- Run Next.js from `frontend/`
+
+---
+
+## 🧪 Quality Checks & Validation Flow
+
+```mermaid
+flowchart LR
+    A[🧾 Upload Input] --> B[✅ Backend Validation]
+    B --> C[🧠 Snippet Extraction]
+    C --> D[📋 UI Rendering]
+    D --> E[🔊 Audio Generation]
+    E --> F[🎧 Playback Verification]
 ```
 
-### Step 3 — Verify
-- `http://localhost:3000`
-- `http://localhost:8000/docs`
+This flow ensures each stage is testable and user-visible from ingestion to final playback.
 
-### Step 4 — Persist data volumes (recommended)
-```bash
-docker run --name adobe-hackathon \
-  -p 3000:3000 -p 8000:8000 \
-  -v $(pwd)/backend/uploads:/app/backend/uploads \
-  -v $(pwd)/backend/audio:/app/backend/audio \
-  -v $(pwd)/backend/uploads.db:/app/backend/uploads.db \
-  -d adobe-hackathon-2025:latest
+---
+
+## 🔮 Future Enhancements Roadmap
+
+```mermaid
+flowchart TD
+    A[🧬 Current Prototype] --> B[☁️ Object Storage S3/GCS]
+    A --> C[🛢️ PostgreSQL + Migrations]
+    A --> D[🔐 Authentication + Multi-user Isolation]
+    A --> E[🤖 Embeddings + Better Ranking]
+    A --> F[🌍 Multilingual + Multi-voice TTS]
+    A --> G[📈 Monitoring + Analytics]
 ```
 
-## Option B: Split production deployment (recommended at scale)
-
-### Backend deploy
-- Deploy FastAPI service (Render/Railway/Fly/EC2).
-- Set service to expose port 8000 (or platform port binding).
-- Add CORS allowlist for your frontend domain.
-
-### Frontend deploy
-- Deploy Next.js app (Vercel/Netlify).
-- Set env: `NEXT_PUBLIC_API_BASE=https://<backend-domain>`.
-- Redeploy frontend with updated env.
-
-### Why split is better
-- Independent scaling.
-- Better reliability and release control.
-- Cleaner observability.
+| Upgrade Track | Expected Improvement |
+|---|---|
+| ☁️ Managed storage | Stronger durability and scale beyond local disk. |
+| 🛢️ Postgres migration | Better relational querying and production readiness. |
+| 🔐 Auth & tenancy | Secure multi-user operation and isolation. |
+| 🤖 Smarter summarization | More relevant snippet ranking and insight quality. |
+| 🌍 Voice/language expansion | Improved accessibility for global users. |
+| 📈 Observability | Better operational visibility and debugging. |
 
 ---
 
-## 14) Differences in this project vs generic PDF apps
+## 🏁 Final Pitch
 
-- Supports **persona + job metadata** as first-class context.
-- Includes **audio generation** from extracted snippets.
-- Built as a **full-stack workflow**, not a standalone parser script.
-- Already includes **containerized all-in-one deployment path**.
+This project is designed for teams who need to move from **document overload** to **actionable understanding** quickly.
 
----
+- 📄 Ingest documents with context,
+- 🧠 extract meaningful insight,
+- 🔊 deliver podcast-style playback,
+- 🎯 improve speed of decision-making.
 
-## 15) Known Gaps / Current Limitations
-
-- Local SQLite/file storage is not ideal for multi-instance production.
-- Authentication/authorization not enforced for uploads.
-- Validation limits (file size/type/deep sanitization) can be strengthened.
-- Some frontend helper code and backend routes should be kept fully aligned as API evolves.
-
----
-
-## 16) Suggested Next Improvements
-
-1. Add API contract tests.
-2. Add upload validations and content-security checks.
-3. Move storage to object storage + managed DB.
-4. Add authentication and per-user document isolation.
-5. Add background jobs for large document processing.
-6. Add richer insight generation (summary, theme clustering, action items).
-
----
-
-## 17) Production Hardening Checklist
-
-- [ ] Managed DB instead of SQLite.
-- [ ] Object storage for files/audio.
-- [ ] Strict CORS and auth.
-- [ ] Rate limiting + input validation.
-- [ ] Health checks + centralized logging.
-- [ ] CI/CD with lint/test/build/security scan.
-
----
-
-## 18) Troubleshooting
-
-- **Cannot connect frontend to backend:** verify `NEXT_PUBLIC_API_BASE` and backend status.
-- **CORS errors in browser:** include deployed frontend URL in FastAPI CORS allowlist.
-- **No audio output:** verify ffmpeg and TTS dependencies in runtime.
-- **Data disappears after container restart:** use Docker volumes or external persistent storage.
-
----
-
-## 19) License
-
-MIT license .
+If your PDFs are long and your decisions are time-sensitive — this system is your insight accelerator.
