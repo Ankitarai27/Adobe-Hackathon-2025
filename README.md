@@ -164,7 +164,7 @@ flowchart TB
 ## 🛠️ Tech Stack
 
 ```mermaid
-flowchart LR
+flowchart TB
     FE[💻 Frontend\nNext.js 15 · React 19\nTailwind CSS · react-icons]
     BE[⚙️ Backend\nFastAPI · Uvicorn\nPyMuPDF]
     DATA[🗄️ Data\nSQLite uploads.db]
@@ -327,7 +327,7 @@ This flow ensures each stage is testable and user-visible from ingestion to fina
 ## 🔮 Future Enhancements Roadmap
 
 ```mermaid
-flowchart LR
+flowchart TB
     A[🧬 Current Prototype]
 
     subgraph P1[Phase 1 · Scale Foundation]
