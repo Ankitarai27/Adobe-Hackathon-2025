@@ -350,7 +350,7 @@ flowchart TB
 
     classDef current fill:#E3F2FD,stroke:#1E88E5,color:#0D47A1,stroke-width:2px;
     classDef phase1 fill:#E8F5E9,stroke:#43A047,color:#1B5E20,stroke-width:2px;
-    classDef phase2 fill:#FFF8E1,stroke:#FB8C00,color:#E65100,stroke-width:2px;
+    classDef phase2 stroke:#FB8C00,color:#E65100,stroke-width:2px;
     classDef phase3 fill:#F3E5F5,stroke:#8E24AA,color:#4A148C,stroke-width:2px;
 
     class A current;
