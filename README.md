@@ -258,7 +258,7 @@ docker run -p 3000:3000 -p 8000:8000 adobe-hackathon-2025
 ## 🧪 Quality Checks & Validation Flow
 
 ```mermaid
-flowchart LR
+flowchart TB
     A[🧾 Upload Input] --> B[✅ Backend Validation]
     B --> C[🧠 Snippet Extraction]
     C --> D[📋 UI Rendering]
