@@ -71,7 +71,7 @@ flowchart TB
     end
 
     subgraph Row2
-    direction RL
+    direction LR
     D[📤 Upload PDF] --> E[✅ Backend Validates File] --> F[🗂️ Save PDF in backend/uploads]
     end
 
