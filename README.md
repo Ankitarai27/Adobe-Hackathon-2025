@@ -65,27 +65,38 @@ Upload PDFs → Extract role-specific insights → Listen as an audio briefing
 ```mermaid
 flowchart TB
 
-    %% Row 1 →
+    subgraph Row1
+    direction LR
     A[👤 Open Web App] --> B[🎭 Choose Persona] --> C[🧾 Enter Job Context]
+    end
 
-    %% Row 2 ←
-    C --> D[📤 Upload PDF]
-    D --> E[✅ Backend Validates File]
-    E --> F[🗂️ Save PDF in backend/uploads]
+    subgraph Row2
+    direction RL
+    D[📤 Upload PDF] --> E[✅ Backend Validates File] --> F[🗂️ Save PDF in backend/uploads]
+    end
 
-    %% Force reverse direction
-    F --> G[🗃️ Save Metadata in uploads.db]
-    G --> H[📚 List docs via /uploads/:role]
-    H --> I[📖 Pick Document]
+    C --> D
 
-    %% Row 3 →
-    I --> J[🧠 Extract Snippets + Headings]
-    J --> K[🪄 Render Insight Cards]
+    subgraph Row3
+    direction LR
+    G[🗃️ Save Metadata in uploads.db] --> H[📚 List docs via /uploads/:role] --> I[📖 Pick Document]
+    end
 
-    %% Row 4 →
-    K --> L[🎙️ Click Podcast Mode]
-    L --> M[🔊 Generate MP3 in backend/audio]
-    M --> N[▶️ Stream Audio in Browser]
+    F --> G
+
+    subgraph Row4
+    direction LR
+    J[🧠 Extract Snippets + Headings] --> K[🪄 Render Insight Cards] --> L[🎙️ Click Podcast Mode]
+    end
+
+    I --> J
+
+    subgraph Row5
+    direction LR
+    M[🔊 Generate MP3 in backend/audio] --> N[▶️ Stream Audio in Browser]
+    end
+
+    L --> M
 
     classDef user fill:#E3F2FD,stroke:#1E88E5,color:#0D47A1,stroke-width:2px;
     classDef input fill:#E8F5E9,stroke:#43A047,color:#1B5E20,stroke-width:2px;
