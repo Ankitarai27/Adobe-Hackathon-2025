@@ -354,7 +354,6 @@ flowchart TB
 
     class A current;
     class B,C phase1;
-    class D,E phase2;
     class F,G phase3;
 ```
 
