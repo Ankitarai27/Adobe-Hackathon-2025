@@ -63,17 +63,26 @@ Upload PDFs → Extract role-specific insights → Listen as an audio briefing
 ## 🧭 Product Journey Flowchart (Detailed)
 
 ```mermaid
-flowchart LR
-    A[👤 Open Web App] --> B[🎭 Choose Persona]
-    B --> C[🧾 Enter Job Context]
+flowchart TB
+
+    %% Row 1 →
+    A[👤 Open Web App] --> B[🎭 Choose Persona] --> C[🧾 Enter Job Context]
+
+    %% Row 2 ←
     C --> D[📤 Upload PDF]
     D --> E[✅ Backend Validates File]
     E --> F[🗂️ Save PDF in backend/uploads]
+
+    %% Force reverse direction
     F --> G[🗃️ Save Metadata in uploads.db]
     G --> H[📚 List docs via /uploads/:role]
     H --> I[📖 Pick Document]
+
+    %% Row 3 →
     I --> J[🧠 Extract Snippets + Headings]
     J --> K[🪄 Render Insight Cards]
+
+    %% Row 4 →
     K --> L[🎙️ Click Podcast Mode]
     L --> M[🔊 Generate MP3 in backend/audio]
     M --> N[▶️ Stream Audio in Browser]
