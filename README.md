@@ -35,7 +35,7 @@ flowchart LR
     D --> E[✅ Backend Validates File]
     E --> F[🗂️ Save PDF in backend/uploads]
     F --> G[🗃️ Save Metadata in uploads.db]
-    G --> H[📚 List docs via /uploads/{role}]
+    G --> H[📚 List docs via /uploads/:role]
     H --> I[📖 Pick document]
     I --> J[🧠 Extract snippets / headings]
     J --> K[🪄 Render insight cards]
@@ -78,10 +78,10 @@ flowchart TB
     end
 
     subgraph API[⚙️ FastAPI Backend]
-        A1[/POST /upload/]
-        A2[/GET /uploads/{role}/]
-        A3[/GET /snippets/{filename}/]
-        A4[/GET /snippets/audio/{filename}/]
+        A1[POST /upload]
+        A2[GET /uploads/:role]
+        A3[GET /snippets/:filename]
+        A4[GET /snippets/audio/:filename]
     end
 
     subgraph SRV[🧠 Service Layer]
