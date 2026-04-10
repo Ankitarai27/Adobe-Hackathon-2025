@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaUpload, FaTimes, FaHistory } from "react-icons/fa";
@@ -6,6 +7,7 @@ import { FaUpload, FaTimes, FaHistory } from "react-icons/fa";
 export default function UploadPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
   const paramRole = searchParams.get("role");
   const paramJob = searchParams.get("job");
   const role = useMemo(
@@ -31,6 +33,7 @@ export default function UploadPageClient() {
 
   useEffect(() => {
     if (!BASE_URL || !role) return;
+
     setUploadError("");
 
     fetch(`${BASE_URL}/uploads/${encodeURIComponent(role)}`)
@@ -92,6 +95,7 @@ export default function UploadPageClient() {
 
         // Refresh uploaded list
         const refreshed = await fetch(`${BASE_URL}/uploads/${encodeURIComponent(role)}`);
+
         if (!refreshed.ok) {
           throw new Error(`Refresh uploads failed (${refreshed.status})`);
         }
@@ -218,6 +222,7 @@ export default function UploadPageClient() {
         </button>
         <button
           onClick={() =>
+
             router.push(
               `/analysis?role=${encodeURIComponent(role || "")}&job=${encodeURIComponent(
                 job || ""
