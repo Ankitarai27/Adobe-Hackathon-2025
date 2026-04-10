@@ -31,6 +31,9 @@ export default function AnalysisPageClient() {
   const [files, setFiles] = useState([]);
   const [audioUrl, setAudioUrl] = useState(null); // ✅ NEW
 
+  const [insights, setInsights] = useState(null);
+  const [loadingInsights, setLoadingInsights] = useState(false);
+
   const BASE_URL = process.env.NEXT_PUBLIC_API_BASE;
 
   // ✅ Fetch uploaded files
@@ -39,28 +42,42 @@ export default function AnalysisPageClient() {
     fetch(`${BASE_URL}/uploads/${encodeURIComponent(role)}`)
       .then((res) => res.json())
       .then((data) => {
-        setFiles(Array.isArray(data) ? data : []);
+
+        const normalized = Array.isArray(data) ? data : [];
+        setFiles(normalized);
+        if (normalized.length > 0 && !selectedFile) {
+          setSelectedFile(normalized[0].filename);
+        }
       })
       .catch((err) => console.error("Error fetching uploads:", err));
-  }, [BASE_URL, role]);
+  }, [BASE_URL, role, selectedFile]);
 
   // ✅ Fetch snippets
   useEffect(() => {
     if (!selectedFile) return;
-    fetch(`${BASE_URL}/snippets/${selectedFile}`)
+
+    fetch(
+      `${BASE_URL}/snippets/${encodeURIComponent(selectedFile)}?role=${encodeURIComponent(
+        role || ""
+      )}&job=${encodeURIComponent(job || "")}`
+    )
       .then((res) => res.json())
       .then((data) => {
         setSnippets(data.snippets || []);
+        setInsights(null);
         setAudioUrl(null); // ✅ Reset audio if new file selected
       })
       .catch((err) => console.error("Error fetching snippets:", err));
-  }, [BASE_URL, selectedFile]);
+  }, [BASE_URL, selectedFile, role, job]);
 
   // ✅ Podcast generation
   const handleGeneratePodcast = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile) {
+      alert("Please select a document first.");
+      return;
+    }
     try {
-      const res = await fetch(`${BASE_URL}/snippets/audio/${selectedFile}`);
+      const res = await fetch(`${BASE_URL}/snippets/audio/${encodeURIComponent(selectedFile)}`);
       const data = await res.json();
       if (data.audio_url) {
         setAudioUrl(`${BASE_URL}${data.audio_url}`);
@@ -70,6 +87,33 @@ export default function AnalysisPageClient() {
     } catch (err) {
       console.error("Podcast generation error:", err);
       alert("Error generating podcast");
+    }
+  };
+
+
+  const handleGenerateInsights = async () => {
+    if (!selectedFile) {
+      alert("Please select a document first.");
+      return;
+    }
+    setLoadingInsights(true);
+    try {
+      const res = await fetch(
+        `${BASE_URL}/insights/${encodeURIComponent(selectedFile)}?role=${encodeURIComponent(
+          role || ""
+        )}&job=${encodeURIComponent(job || "")}`
+      );
+      const data = await res.json();
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
+      setInsights(data);
+    } catch (err) {
+      console.error("Insights generation error:", err);
+      alert("Error generating insights");
+    } finally {
+      setLoadingInsights(false);
     }
   };
 
@@ -90,8 +134,13 @@ export default function AnalysisPageClient() {
           >
             <FaHeadphones /> Podcast Mode
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200">
-            <FaLightbulb className="text-yellow-500 animate-pulse" /> Insights
+
+          <button
+            onClick={handleGenerateInsights}
+            className="flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200"
+          >
+            <FaLightbulb className="text-yellow-500 animate-pulse" />{" "}
+            {loadingInsights ? "Generating..." : "Insights"}
           </button>
         </div>
       </div>
@@ -168,6 +217,25 @@ export default function AnalysisPageClient() {
                     Audio Podcast
                   </h3>
                   <audio controls src={audioUrl} className="w-full" />
+                </div>
+              )}
+
+              {insights && (
+                <div className="mt-6 border rounded-lg p-4 bg-yellow-50">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                    Insight Summary
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-2">
+                    Extraction Mode: <span className="font-semibold">{insights.extraction_mode}</span>
+                  </p>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Top Keywords: {(insights.top_keywords || []).join(", ") || "N/A"}
+                  </p>
+                  <ul className="list-disc pl-6 space-y-1 text-gray-700 text-sm">
+                    {(insights.highlights || []).map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
                 </div>
               )}
             </div>
