@@ -2,7 +2,6 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { FaLightbulb, FaHeadphones, FaList } from "react-icons/fa";
-
 export default function AnalysisPageClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
