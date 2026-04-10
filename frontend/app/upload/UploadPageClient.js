@@ -1,16 +1,31 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaUpload, FaTimes, FaHistory } from "react-icons/fa";
 
 export default function UploadPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const role = searchParams.get("role");
-  const job = searchParams.get("job");
+
+  const paramRole = searchParams.get("role");
+  const paramJob = searchParams.get("job");
+  const role = useMemo(
+    () =>
+      paramRole ||
+      (typeof window !== "undefined" ? sessionStorage.getItem("personaRole") : ""),
+    [paramRole]
+  );
+  const job = useMemo(
+    () =>
+      paramJob ||
+      (typeof window !== "undefined" ? sessionStorage.getItem("personaJob") : ""),
+    [paramJob]
+  );
 
   const [files, setFiles] = useState([]);
   const [uploaded, setUploaded] = useState([]);
+  const [uploadError, setUploadError] = useState("");
   const totalPages = 3;
   const currentPage = 2;
 
@@ -19,16 +34,37 @@ export default function UploadPageClient() {
   useEffect(() => {
     if (!BASE_URL || !role) return;
 
+    setUploadError("");
+
     fetch(`${BASE_URL}/uploads/${encodeURIComponent(role)}`)
-      .then((res) => res.json())
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to fetch uploads (${res.status})`);
+        }
+        return res.json();
+      })
       .then((data) => {
         console.log("Uploads from backend:", data);
-        setUploaded(data || []);
+        setUploaded(Array.isArray(data) ? data : []);
       })
-      .catch((err) => console.error("Error fetching uploads:", err));
+      .catch((err) => {
+        console.error("Error fetching uploads:", err);
+        setUploadError(
+          "Could not load uploaded files. Check backend URL/CORS and redeploy backend."
+        );
+      });
   }, [BASE_URL, role]);
 
   const handleFileChange = async (e) => {
+    if (!BASE_URL) {
+      setUploadError("NEXT_PUBLIC_API_BASE is not set in the frontend Render environment.");
+      return;
+    }
+    if (!role || !job) {
+      setUploadError("Role/job is missing. Go back to Persona step and try again.");
+      return;
+    }
+    setUploadError("");
     const newFiles = Array.from(e.target.files);
     setFiles((prev) => [...prev, ...newFiles]);
 
@@ -59,10 +95,17 @@ export default function UploadPageClient() {
 
         // Refresh uploaded list
         const refreshed = await fetch(`${BASE_URL}/uploads/${encodeURIComponent(role)}`);
+
+        if (!refreshed.ok) {
+          throw new Error(`Refresh uploads failed (${refreshed.status})`);
+        }
         const uploads = await refreshed.json();
-        setUploaded(uploads || []);
+        setUploaded(Array.isArray(uploads) ? uploads : []);
       } catch (err) {
         console.error("Upload failed:", err);
+        setUploadError(
+          "Upload failed. If this is Render, set backend FRONTEND_ORIGINS to your frontend URL and redeploy backend."
+        );
       }
     }
   };
@@ -179,7 +222,12 @@ export default function UploadPageClient() {
         </button>
         <button
           onClick={() =>
-            router.push(`/analysis?role=${role}&job=${job}`)
+
+            router.push(
+              `/analysis?role=${encodeURIComponent(role || "")}&job=${encodeURIComponent(
+                job || ""
+              )}`
+            )
           }
           disabled={uploaded.length === 0}
           className={`px-6 py-3 rounded-xl font-semibold shadow-md transition
@@ -191,6 +239,11 @@ export default function UploadPageClient() {
           Start Analysis →
         </button>
       </div>
+      {uploadError && (
+        <div className="mt-4 w-full max-w-2xl rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {uploadError}
+        </div>
+      )}
     </div>
   );
 }
