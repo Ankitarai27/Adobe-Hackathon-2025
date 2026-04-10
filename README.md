@@ -354,6 +354,17 @@ docker run -p 3000:3000 -p 8000:8000 adobe-hackathon-2025
 - Run FastAPI from `backend/`
 - Run Next.js from `frontend/`
 
+### Option C — Render (frontend + backend)
+- Deploy backend service from `backend/` with start command:
+  - `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- Deploy frontend service from `frontend/` with:
+  - Build: `npm install && npm run build`
+  - Start: `npm run start`
+- Set frontend environment variable:
+  - `NEXT_PUBLIC_API_BASE=https://<your-backend>.onrender.com`
+- Set backend environment variable:
+  - `FRONTEND_ORIGINS=https://<your-frontend>.onrender.com`
+
 ---
 
 ## 🧪 Quality Checks & Validation Flow
