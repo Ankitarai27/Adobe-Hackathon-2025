@@ -40,6 +40,16 @@ app.add_middleware(
 app.mount("/pdfs", StaticFiles(directory=UPLOAD_DIR), name="pdfs")
 app.mount("/audio", StaticFiles(directory=AUDIO_DIR), name="audio")
 
+
+@app.get("/")
+async def root():
+    return {"status": "ok", "service": "adobe-hackathon-backend"}
+
+
+@app.get("/health")
+async def health():
+    return {"status": "healthy"}
+
 # ✅ SQLite Setup
 conn = sqlite3.connect("uploads.db", check_same_thread=False)
 cursor = conn.cursor()
@@ -175,7 +185,6 @@ async def extract_snippets(filename: str, role: str = "", job: str = ""):
     file_path = os.path.join(UPLOAD_DIR, filename)
     if not os.path.exists(file_path):
         return {"error": "File not found"}
-
 
     snippets, extraction_mode = build_snippets_from_pdf(
         file_path,
