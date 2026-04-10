@@ -12,6 +12,7 @@ from app.generate_audio import generate_audio
 # ✅ Initialize App
 app = FastAPI()
 
+
 # ✅ Directories
 UPLOAD_DIR = "uploads"
 AUDIO_DIR = "audio"
