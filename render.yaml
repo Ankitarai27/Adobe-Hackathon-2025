@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: adobe-hackathon-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: FRONTEND_ORIGINS
+        sync: false
+
+  - type: web
+    name: adobe-hackathon-frontend
+    env: node
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NEXT_PUBLIC_API_BASE
+        sync: false
