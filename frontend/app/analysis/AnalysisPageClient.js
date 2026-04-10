@@ -30,6 +30,7 @@ export default function AnalysisPageClient() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [files, setFiles] = useState([]);
   const [audioUrl, setAudioUrl] = useState(null); // ✅ NEW
+
   const [insights, setInsights] = useState(null);
   const [loadingInsights, setLoadingInsights] = useState(false);
 
@@ -41,6 +42,7 @@ export default function AnalysisPageClient() {
     fetch(`${BASE_URL}/uploads/${encodeURIComponent(role)}`)
       .then((res) => res.json())
       .then((data) => {
+
         const normalized = Array.isArray(data) ? data : [];
         setFiles(normalized);
         if (normalized.length > 0 && !selectedFile) {
@@ -53,6 +55,7 @@ export default function AnalysisPageClient() {
   // ✅ Fetch snippets
   useEffect(() => {
     if (!selectedFile) return;
+
     fetch(
       `${BASE_URL}/snippets/${encodeURIComponent(selectedFile)}?role=${encodeURIComponent(
         role || ""
@@ -86,6 +89,7 @@ export default function AnalysisPageClient() {
       alert("Error generating podcast");
     }
   };
+
 
   const handleGenerateInsights = async () => {
     if (!selectedFile) {
@@ -130,6 +134,7 @@ export default function AnalysisPageClient() {
           >
             <FaHeadphones /> Podcast Mode
           </button>
+
           <button
             onClick={handleGenerateInsights}
             className="flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200"

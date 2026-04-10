@@ -4,12 +4,14 @@ from fastapi.staticfiles import StaticFiles
 import os, shutil, sqlite3, datetime, uuid
 import fitz  # PyMuPDF
 from pdfminer.high_level import extract_text
+
 from collections import Counter
 import re
 from app.generate_audio import generate_audio
 
 # ✅ Initialize App
 app = FastAPI()
+
 
 # ✅ Directories
 UPLOAD_DIR = "uploads"
@@ -81,6 +83,7 @@ def build_snippets_from_pdf(file_path: str, max_snippets: int = 8, query_text: s
     """
     doc = fitz.open(file_path)
     snippets = []
+
     candidates = []
     section_title = "Untitled Section"
     query_terms = {
@@ -113,6 +116,7 @@ def build_snippets_from_pdf(file_path: str, max_snippets: int = 8, query_text: s
                                 "snippet": snippet_text,
                                 "page": page_num
                             })
+
 
     # Rank candidates by relevance + content richness and pick diverse pages
     if candidates:
