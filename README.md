@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🚀 Adobe Hackathon 2025
+# 🚀 Adobe Hackathon 2025-Adobe Document Intelligence
 ### <i>Intelligent PDF Insight & Podcast Generator</i>
 
 <p>
